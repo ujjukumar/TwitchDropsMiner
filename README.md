@@ -1,5 +1,7 @@
 # Twitch Drops Miner
 
+[![Windows Build](https://github.com/ujjukumar/TwitchDropsMiner/actions/workflows/ci.yml/badge.svg)](https://github.com/ujjukumar/TwitchDropsMiner/actions/workflows/ci.yml)
+
 This application allows you to AFK mine timed Twitch drops, without having to worry about switching channels when the one you were watching goes offline, claiming the drops, or even receiving the stream data itself. This helps you save on bandwidth and hassle.
 
 ### How It Works:
@@ -19,7 +21,7 @@ Every several seconds, the application pretends to watch a particular stream by 
 
 ### Usage:
 
-- Download and unzip [the latest release](https://github.com/DevilXD/TwitchDropsMiner/releases) - it's recommended to keep it in the folder it comes in.
+- Download and unzip [the latest Windows release](https://github.com/ujjukumar/TwitchDropsMiner/releases/tag/dev-build) - it's recommended to keep it in the folder it comes in.
 - Run it and login/connect the miner to your Twitch account by using the in-app login form.
 - After a successful login, the app should fetch a list of all available campaigns and games you can mine drops for - you can then select and add games of choice to the Priority List available on the Settings tab, and then press on the `Reload` button to start processing. It will fetch a list of all applicable streams it can watch, and start mining right away. You can also manually switch to a different channel as needed.
 - If you wish to keep the miner occupied with mining anything it can, beyond what you've selected via the Priority List, you can use the Priority Mode setting to specify the mining order for the rest of the games.
