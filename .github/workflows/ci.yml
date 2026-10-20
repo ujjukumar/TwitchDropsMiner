@@ -154,6 +154,7 @@ jobs:
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: artifacts/*
+          commit: ${{ github.sha }}
           body: |
             **This is an automatically generated Windows development build, containing the latest master branch changes.**
 
