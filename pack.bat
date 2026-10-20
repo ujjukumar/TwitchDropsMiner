@@ -13,7 +13,17 @@ IF EXIST "Twitch Drops Miner.zip" (
 )
 rem Pack and test
 7z %action% "Twitch Drops Miner.zip" "Twitch Drops Miner/" -r
+IF ERRORLEVEL 1 (
+    echo Packaging failed while creating the archive!
+    IF EXIST "Twitch Drops Miner" rmdir /s /q "Twitch Drops Miner"
+    exit /b 1
+)
 7z t "Twitch Drops Miner.zip" * -r
+IF ERRORLEVEL 1 (
+    echo Archive verification failed!
+    IF EXIST "Twitch Drops Miner" rmdir /s /q "Twitch Drops Miner"
+    exit /b 1
+)
 rem Cleanup
 IF EXIST "Twitch Drops Miner" rmdir /s /q "Twitch Drops Miner"
 GOTO EXIT

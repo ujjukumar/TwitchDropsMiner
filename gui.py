@@ -533,7 +533,8 @@ class LoginForm:
         frame.columnconfigure(0, weight=2)
         frame.columnconfigure(1, weight=1)
         frame.rowconfigure(4, weight=1)
-        ttk.Label(frame, text=_("gui", "login", "labels")).grid(column=0, row=0)
+        labels_text = f'{_("gui", "login", "labels")}\n{_("gui", "login", "username")}:'
+        ttk.Label(frame, text=labels_text).grid(column=0, row=0)
         ttk.Label(frame, textvariable=self._var, justify="center").grid(column=1, row=0)
         self._login_entry = PlaceholderEntry(frame, placeholder=_("gui", "login", "username"))
         # self._login_entry.grid(column=0, row=1, columnspan=2)
@@ -581,8 +582,8 @@ class LoginForm:
                 self._token_entry.get().strip(),
             )
             # basic input data validation: 3-25 characters in length, only ascii and underscores
-            if (
-                not 3 <= len(login_data.username) <= 25
+            if not (
+                3 <= len(login_data.username) <= 25
                 and re.match(r'^[a-zA-Z0-9_]+$', login_data.username)
             ):
                 self.clear(login=True)
@@ -605,12 +606,10 @@ class LoginForm:
         await asyncio.sleep(4)
         webopen(page_url)
 
-    def update(self, status: str, user_id: int | None):
-        if user_id is not None:
-            user_str = str(user_id)
-        else:
-            user_str = "-"
-        self._var.set(f"{status}\n{user_str}")
+    def update(self, status: str, user_id: int | None, username: str | None = None):
+        user_str = "-" if user_id is None else str(user_id)
+        name_str = username if username else "-"
+        self._var.set(f"{status}\n{user_str}\n{name_str}")
 
 
 class _BaseVars(TypedDict):

@@ -58,6 +58,34 @@ for source_path, dest_path, required in to_add:
     elif required:
         raise FileNotFoundError(str(source_path))
 
+# Python 3.14 ships Tcl/Tk 9, whose library lives inside a zipfs archive rather than an
+# on-disk directory; PyInstaller (<=6.22) can't collect it, so the frozen app dies with
+# 'Tcl data directory "..._tcl_data" not found'. Extract the library zips ourselves and
+# bundle them as the _tcl_data/_tk_data dirs that PyInstaller's tkinter rthook expects.
+import shutil
+import zipfile
+import _tkinter
+
+if sys.platform == "win32" and int(_tkinter.TCL_VERSION.split(".")[0]) >= 9:
+    tcl_root = Path(sys.base_prefix, "tcl")
+    extract_root = Path(WORKING_DIR, "build", "_tcltk9_data")
+    shutil.rmtree(extract_root, ignore_errors=True)
+    zip_specs = [("tcl_library", "_tcl_data", "libtcl*.zip"), ("tk_library", "_tk_data", "libtk*.zip")]
+    collected = 0
+    for src_prefix, dest_root, zip_glob in zip_specs:
+        for zip_path in sorted(tcl_root.glob(zip_glob)):
+            with zipfile.ZipFile(zip_path) as zf:
+                for entry in zf.namelist():
+                    if entry.endswith("/") or not entry.startswith(f"{src_prefix}/"):
+                        continue
+                    target = extract_root / dest_root / Path(entry).relative_to(src_prefix)
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(zf.read(entry))
+                    datas.append((target, str(target.parent.relative_to(extract_root)).replace("\\", "/")))
+                    collected += 1
+    if not collected:
+        raise FileNotFoundError(f"Tcl/Tk 9 library zips not found under {tcl_root}")
+
 hooksconfig: dict[str, Any] = {}
 binaries: list[tuple[Path, str]] = []
 hiddenimports: list[str] = [

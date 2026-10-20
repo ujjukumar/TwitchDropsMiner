@@ -422,7 +422,9 @@ class _AuthState:
             self.user_id = int(validate_response["user_id"])
             cookie["persistent"] = str(self.user_id)
             logger.info(f"Login successful, user ID: {self.user_id}")
-            login_form.update(_("gui", "login", "logged_in"), self.user_id)
+            login_form.update(
+                _("gui", "login", "logged_in"), self.user_id, validate_response.get("login")
+            )
             # update our cookie and save it
             jar.update_cookies(cookie, client_info.CLIENT_URL)
             jar.save(COOKIES_PATH)

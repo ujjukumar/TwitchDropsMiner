@@ -270,11 +270,27 @@ class Websocket:
                 ws_logger.error(f"Websocket[{self._idx}] error: Unknown message: {raw_message}")
 
     def _handle_message(self, message):
-        # request the assigned topic to process the response
-        topic = self.topics.get(message["data"]["topic"])
-        if topic is not None:
-            # use a task to not block the websocket
-            asyncio.create_task(topic(json.loads(message["data"]["message"])))
+        try:
+            data = message["data"]
+            # request the assigned topic to process the response
+            topic = self.topics.get(data["topic"])
+            if topic is None:
+                return
+            message_data = json.loads(data["message"])
+        except (ValueError, KeyError, TypeError):
+            ws_logger.warning(f"Websocket[{self._idx}] received a malformed message: {message}")
+            return
+        # use a task to not block the websocket
+        task = asyncio.create_task(topic(message_data))
+        # ensure exceptions raised inside the topic handler aren't silently swallowed
+        task.add_done_callback(self._on_topic_task_done)
+
+    def _on_topic_task_done(self, task: asyncio.Task[Any]) -> None:
+        if task.cancelled():
+            return
+        exc = task.exception()
+        if exc is not None:
+            ws_logger.error(f"Websocket[{self._idx}] topic handler error: {format_traceback(exc)}")
 
     async def _handle_recv(self):
         """
@@ -323,7 +339,8 @@ class Websocket:
 
     async def send(self, message: JsonType):
         ws = self._ws.get_with_default(None)
-        assert ws is not None
+        if ws is None:
+            raise WebsocketClosed(received=False)
         if message["type"] != "PING":
             message["nonce"] = create_nonce(CHARS_ASCII, 30)
         try:

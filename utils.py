@@ -7,6 +7,7 @@ import sys
 import json
 import random
 import string
+import secrets
 import asyncio
 import logging
 import traceback
@@ -117,7 +118,7 @@ CHARS_HEX_UPPER = string.digits + "ABCDEF"
 
 
 def create_nonce(chars: str, length: int) -> str:
-    return ''.join(random.choices(chars, k=length))
+    return ''.join(secrets.choice(chars) for _ in range(length))
 
 
 def deduplicate(iterable: abc.Iterable[_T]) -> list[_T]:
